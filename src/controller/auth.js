@@ -35,6 +35,14 @@ module.exports = {
     authModel
       .getUserByEmail(email)
       .then((data) => {
+        if (!data.length) {
+          return form.error(
+            res,
+            "Email or password is not match",
+            "bcyript",
+            401
+          );
+        }
         bcrypt.compare(password, data[0].password, (err, result) => {
           if (err) {
             form.error(res, err, "bcyript", 401);
@@ -56,7 +64,7 @@ module.exports = {
               .then(() => {
                 form.success(res, "success login", { ...payload, token }, 200);
               })
-              .catch((e) => {
+              .catch(() => {
                 form.error(res, "insert token", "error", 404);
               });
           }
@@ -120,5 +128,30 @@ module.exports = {
         form.error(res, e, "Error", 200);
       });
   },
-  postPin: (req, res) => {},
+  postOtp: (req, res) => {
+    const { otp } = req.body;
+
+    console.log(otp);
+    authModel
+      .getOtp(otp)
+      .then((data) => {
+        if (!data.length) {
+          form.error(res, "Otp not found", "Otp", 401);
+        } else {
+          authModel
+            .updateVerified(data[0].email)
+            .then(() => {
+              authModel.deleteOtp(otp).then(() => {
+                form.success(res, "success update", "otp", 200);
+              });
+            })
+            .catch((e) => {
+              form.error(res, e, "Error", 200);
+            });
+        }
+      })
+      .catch((e) => {
+        form.error(res, e, "Error", 200);
+      });
+  },
 };

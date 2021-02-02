@@ -39,8 +39,9 @@ module.exports = {
   },
   getOtp: (otp) => {
     return new Promise((resolve, reject) => {
-      const q = `SELECT * FROM otps WHERE code='${otp}'`;
-      db.query(q, body, (err, data) => {
+      // const q = `SELECT * FROM otps WHERE kode='${otp}'`;
+      const q = `SELECT * FROM otps AS o JOIN users AS u ON u.email=o.email WHERE o.kode='${otp}'`;
+      db.query(q, (err, data) => {
         if (err) {
           reject(err);
         } else {
@@ -61,9 +62,9 @@ module.exports = {
       });
     });
   },
-  deleteOtp: (email) => {
+  deleteOtp: (otp) => {
     return new Promise((resolve, reject) => {
-      const q = `DELETE FROM otp WHERE email='${email}' `;
+      const q = `DELETE FROM otps WHERE kode='${otp}' `;
       db.query(q, (err, data) => {
         if (err) {
           reject(err);
@@ -75,7 +76,7 @@ module.exports = {
   },
   updateVerified: (email) => {
     return new Promise((resolve, reject) => {
-      const q = `UPDATE users SET verified=1 WHERE email='${email}'`;
+      const q = `UPDATE users SET is_verified=1 WHERE email='${email}'`;
       db.query(q, (err, data) => {
         if (err) {
           reject(err);
