@@ -18,7 +18,10 @@ const sendEmail = (email, res, otp) => {
     from: "Admin Blanja",
     to: email,
     subject: "Code OTP",
-    html: "<p>Your code OTP is <b>" + otp + "</b></p>",
+    html:
+      "<p>Anda telah daftar <a href='http://localhost:4000/auth/account/v/" +
+      otp +
+      "'>Click</a> untuk verify akun</p>",
   };
 
   transporter.sendMail(mailOptions, function (error, _) {
@@ -39,10 +42,15 @@ module.exports = {
           return form.error(
             res,
             "Email or password is not match",
-            "bcyript",
+            "email",
             401
           );
         }
+
+        if (data[0].is_verified == 0) {
+          return form.error(res, "Email is not verified", "email", 401);
+        }
+
         bcrypt.compare(password, data[0].password, (err, result) => {
           if (err) {
             form.error(res, err, "bcyript", 401);
@@ -128,6 +136,32 @@ module.exports = {
         form.error(res, e, "Error", 200);
       });
   },
+  verifyOtp: (req, res) => {
+    const { otp } = req.params;
+
+    console.log(otp);
+    authModel
+      .getOtp(otp)
+      .then((data) => {
+        if (!data.length) {
+          form.error(res, "Otp not found", "Otp", 401);
+        } else {
+          authModel
+            .updateVerified(data[0].email)
+            .then(() => {
+              authModel.deleteOtp(otp).then(() => {
+                form.success(res, "success verify", "otp", 200);
+              });
+            })
+            .catch((e) => {
+              form.error(res, e, "Error", 200);
+            });
+        }
+      })
+      .catch((e) => {
+        form.error(res, e, "Error", 200);
+      });
+  },
   postOtp: (req, res) => {
     const { otp } = req.body;
 
@@ -153,5 +187,46 @@ module.exports = {
       .catch((e) => {
         form.error(res, e, "Error", 200);
       });
+  },
+  postPin: (req, res) => {
+    const { pin, id } = req.body;
+
+    authModel
+      .getUserByPin(pin)
+      .then((user) => {
+        if (user.length) {
+          form.error(res, "Pin has been registered", "error pin", 401);
+        } else {
+          authModel
+            .updatePin(id, pin)
+            .then(() => {
+              form.success(res, "success update", "pin", 200);
+            })
+            .catch((e) => {
+              form.error(res, e, "Error", 404);
+            });
+        }
+      })
+      .catch((e) => {
+        form.error(res, e, "Error", 200);
+      });
+  },
+  logoutUser: (req, res) => {
+    const bearerToken = req.header("x-access-token");
+
+    if (!bearerToken) {
+      form.error(res, "Please login first", "Error User", 401);
+    } else {
+      const token = bearerToken.split(" ")[1];
+
+      authModel
+        .deleteToken(token)
+        .then(() => {
+          form.success(res, "success logout", "logout", 200);
+        })
+        .catch((e) => {
+          form.error(res, e, "Error", 200);
+        });
+    }
   },
 };

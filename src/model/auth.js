@@ -13,18 +13,6 @@ module.exports = {
       });
     });
   },
-  getUseByPin: (pin) => {
-    return new Promise((resolve, reject) => {
-      const q = `SELECT * FROM users WHERE pin='${pin}'`;
-      db.query(q, (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
-  },
   postUser: (body) => {
     return new Promise((resolve, reject) => {
       const q = `INSERT INTO users SET ? `;
@@ -102,6 +90,42 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const q = `INSERT INTO token_whitelist SET ? `;
       db.query(q, { token }, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  },
+  getUserByPin: (pin) => {
+    return new Promise((resolve, reject) => {
+      const q = `SELECT * FROM users WHERE pin='${pin}'`;
+      db.query(q, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  },
+  updatePin: (id, pin) => {
+    return new Promise((resolve, reject) => {
+      const q = `UPDATE users SET pin=${pin} WHERE id_user='${id}'`;
+      db.query(q, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  },
+  deleteToken: (token) => {
+    return new Promise((resolve, reject) => {
+      const q = `DELETE FROM token_whitelist WHERE token='${token}' `;
+      db.query(q, (err, data) => {
         if (err) {
           reject(err);
         } else {
