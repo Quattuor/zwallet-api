@@ -39,13 +39,13 @@ function checkFileType(file, cb) {
 
 const uploadImg = {
   singleUpload: (req, res, next) => {
-    const singleUpload = upload.single("user_img");
+    const singleUpload = upload.single("photo");
     singleUpload(req, res, (err) => {
       if (err) {
         form.error(res, "Multer Error", err, 400);
       } else {
         try {
-          req.body.user_img =
+          req.body.photo =
             process.env.LOCAL + "/images/" + req.file.filename;
         } catch {
           err;
