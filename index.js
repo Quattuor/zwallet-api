@@ -1,9 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const logger = require('morgan');
 const cors = require('cors');
 const bp = require('body-parser');
-const {db} = require('./src/config/database')
-require('dotenv').config();
 
 const { PORT } = process.env;
 

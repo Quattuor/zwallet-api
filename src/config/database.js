@@ -15,6 +15,4 @@ db.connect(() => {
   console.log('succses connect to database');
 });
 
-module.exports = {
-  db,
-};
+module.exports = db
