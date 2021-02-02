@@ -6,6 +6,7 @@ const uploadImg = require("../middlewares/upload");
 
 userRouter.get("/:id", userController.getUserById);
 userRouter.patch("/:id", userController.updateUser);
+userRouter.patch("/pw", userController.updatePass);
 userRouter.patch("/img/:id", uploadImg.singleUpload, userController.updateUser);
 
 module.exports = userRouter;

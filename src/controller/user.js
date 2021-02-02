@@ -40,4 +40,17 @@ module.exports = {
         form.error(res, "Encountered Error", err, 400);
       });
   },
+
+  updatePass: (req, res) => {
+    const { email } = req.decodedToken;
+    const { body } = req;
+    userModel
+      .updatePass(body, email)
+      .then((data) => {
+        form.success(res, "Success Change Password", data, 200);
+      })
+      .catch((err) => {
+        form.error(res, "Encountered Error", err, 400);
+      });
+  },
 };
