@@ -43,12 +43,12 @@ module.exports = {
             res,
             "Email or password is not match",
             "email",
-            401
+            200
           );
         }
 
         if (data[0].is_verified == 0) {
-          return form.error(res, "Email is not verified", "email", 401);
+          return form.error(res, "Email is not verified", "email", 200);
         }
 
         bcrypt.compare(password, data[0].password, (err, result) => {
@@ -56,11 +56,13 @@ module.exports = {
             form.error(res, err, "bcyript", 401);
           }
           if (!result) {
-            form.error(res, "Email or password is not match", "password", 401);
+            form.error(res, "Email or password is not match", "password", 200);
           } else {
             const payload = {
+              id: data[0].id_user,
               username: data[0].username,
               email: data[0].email,
+              pin: data[0].pin,
             };
             const secret = process.env.SECRET_KEY;
             const token = jwt.sign(payload, secret, {
@@ -73,13 +75,13 @@ module.exports = {
                 form.success(res, "success login", { ...payload, token }, 200);
               })
               .catch(() => {
-                form.error(res, "insert token", "error", 404);
+                form.error(res, "insert token", "error", 200);
               });
           }
         });
       })
       .catch((e) => {
-        form.error(res, "Error get", e, 401);
+        form.error(res, "Error get", e, 404);
       });
   },
   registerUser: (req, res) => {
@@ -88,49 +90,49 @@ module.exports = {
     authModel
       .getUserByEmail(body.email)
       .then((data) => {
-        // if (data.length) {
-        //   form.error(res, "email has been registered", "email", 200);
-        // } else {
-        const saltRounds = 10;
-        bcrypt.genSalt(saltRounds, (err, salt) => {
-          if (err) {
-            form.error(res, err, "bycript", 401);
-          }
-          bcrypt.hash(body.password, salt, (err, hashedPassword) => {
+        if (data.length) {
+          form.error(res, "email has been registered", "email", 200);
+        } else {
+          const saltRounds = 10;
+          bcrypt.genSalt(saltRounds, (err, salt) => {
             if (err) {
               form.error(res, err, "bycript", 401);
             }
-            const newBody = {
-              ...body,
-              password: hashedPassword,
-            };
+            bcrypt.hash(body.password, salt, (err, hashedPassword) => {
+              if (err) {
+                form.error(res, err, "bycript", 401);
+              }
+              const newBody = {
+                ...body,
+                password: hashedPassword,
+              };
 
-            authModel
-              .postUser(newBody)
-              .then(() => {
-                const newOtp = otp.generate(6);
-                const bodyOtp = {
-                  email: body.email,
-                  kode: newOtp,
-                };
+              authModel
+                .postUser(newBody)
+                .then(() => {
+                  const newOtp = otp.generate(6);
+                  const bodyOtp = {
+                    email: body.email,
+                    kode: newOtp,
+                  };
 
-                authModel
-                  .insertOtp(bodyOtp)
-                  .then((_) => {
-                    sendEmail(body.email, res, newOtp);
+                  authModel
+                    .insertOtp(bodyOtp)
+                    .then((_) => {
+                      sendEmail(body.email, res, newOtp);
 
-                    form.success(res, "success post", "new user", 200);
-                  })
-                  .catch((e) => {
-                    form.error(res, e, "Error", 404);
-                  });
-              })
-              .catch((e) => {
-                form.error(res, e, "Error", 200);
-              });
+                      form.success(res, "success post", "new user", 200);
+                    })
+                    .catch((e) => {
+                      form.error(res, e, "Error", 404);
+                    });
+                })
+                .catch((e) => {
+                  form.error(res, e, "Error", 200);
+                });
+            });
           });
-        });
-        // }
+        }
       })
       .catch((e) => {
         form.error(res, e, "Error", 200);
@@ -195,7 +197,7 @@ module.exports = {
       .getUserByPin(pin)
       .then((user) => {
         if (user.length) {
-          form.error(res, "Pin has been registered", "error pin", 401);
+          form.error(res, "Pin has been registered", "error pin", 200);
         } else {
           authModel
             .updatePin(id, pin)
