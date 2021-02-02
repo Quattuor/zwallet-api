@@ -1,19 +1,6 @@
 const db = require("../config/database");
 
 module.exports = {
-  getAllUser: () => {
-    return new Promise((resolve, reject) => {
-      const q = `SELECT * FROM users`;
-      db.query(q, (err, data) => {
-        if (err) {
-          console.log(err);
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
-  },
   getUserByEmail: (email) => {
     return new Promise((resolve, reject) => {
       const q = `SELECT * FROM users WHERE email='${email}'`;
@@ -52,7 +39,7 @@ module.exports = {
   },
   getOtp: (otp) => {
     return new Promise((resolve, reject) => {
-      const q = `SELECT * FROM otp WHERE code='${otp}'`;
+      const q = `SELECT * FROM otps WHERE code='${otp}'`;
       db.query(q, body, (err, data) => {
         if (err) {
           reject(err);
@@ -64,7 +51,7 @@ module.exports = {
   },
   insertOtp: (body) => {
     return new Promise((resolve, reject) => {
-      const q = `INSERT INTO otp SET ? `;
+      const q = `INSERT INTO otps SET ? `;
       db.query(q, body, (err, data) => {
         if (err) {
           reject(err);
@@ -102,6 +89,18 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const q = `UPDATE users SET pin='${pin}' WHERE id='${id}'`;
       db.query(q, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  },
+  insertToken: (token) => {
+    return new Promise((resolve, reject) => {
+      const q = `INSERT INTO token_whitelist SET ? `;
+      db.query(q, { token }, (err, data) => {
         if (err) {
           reject(err);
         } else {

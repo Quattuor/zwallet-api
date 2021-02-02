@@ -2,7 +2,8 @@ const authModel = require("../model/auth");
 const form = require("../helper/form");
 const nodemailer = require("nodemailer");
 const otp = require("../helper/otp");
-const auth = require("../model/auth");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const sendEmail = (email, res, otp) => {
   const transporter = nodemailer.createTransport({
@@ -28,52 +29,96 @@ const sendEmail = (email, res, otp) => {
 };
 
 module.exports = {
-  loginUser: (req, res) => {},
-  registerUser: (req, res) => {
-    const { email } = req.body;
+  loginUser: (req, res) => {
+    const { email, password } = req.body;
 
     authModel
-      .getAllUser()
+      .getUserByEmail(email)
       .then((data) => {
-        res.json({ data });
+        bcrypt.compare(password, data[0].password, (err, result) => {
+          if (err) {
+            form.error(res, err, "bcyript", 401);
+          }
+          if (!result) {
+            form.error(res, "Email or password is not match", "password", 401);
+          } else {
+            const payload = {
+              username: data[0].username,
+              email: data[0].email,
+            };
+            const secret = process.env.SECRET_KEY;
+            const token = jwt.sign(payload, secret, {
+              expiresIn: "10h",
+            });
+
+            authModel
+              .insertToken(token)
+              .then(() => {
+                form.success(res, "success login", { ...payload, token }, 200);
+              })
+              .catch((e) => {
+                form.error(res, "insert token", "error", 404);
+              });
+          }
+        });
       })
       .catch((e) => {
-        res.json({ e });
+        form.error(res, "Error get", e, 401);
       });
-    // authModel
-    //   .getUserByEmail(email)
-    //   .then((data) => {
-    //     if (data.length) {
-    //       form.error(res, "email has been registered", "email", 404);
-    //     } else {
-    //       authModel
-    //         .postUser(req.body)
-    //         .then((user) => {
-    //           const newOtp = otp.generate(6);
-    //           const bodyOtp = {
-    //             email,
-    //             code: newOtp,
-    //           };
-    //           authModel
-    //             .insertOtp(bodyOtp)
-    //             .then((_) => {
-    //               sendEmail(email, res, newOtp);
+  },
+  registerUser: (req, res) => {
+    const { body } = req;
 
-    //               form.success(res, "success", user, 200);
-    //             })
-    //             .catch((e) => {
-    //               form.error(res, e, "Error", 404);
-    //             });
-    //         })
-    //         .catch((e) => {
-    //           form.error(res, e, "Error", 404);
-    //         });
-    //     }
-    //   })
-    //   .catch((e) => {
-    //     // form.error(res, e, "Error", 401);
-    //     form.error(res, e, "Error", 404);
-    //   });
+    authModel
+      .getUserByEmail(body.email)
+      .then((data) => {
+        // if (data.length) {
+        //   form.error(res, "email has been registered", "email", 200);
+        // } else {
+        const saltRounds = 10;
+        bcrypt.genSalt(saltRounds, (err, salt) => {
+          if (err) {
+            form.error(res, err, "bycript", 401);
+          }
+          bcrypt.hash(body.password, salt, (err, hashedPassword) => {
+            if (err) {
+              form.error(res, err, "bycript", 401);
+            }
+            const newBody = {
+              ...body,
+              password: hashedPassword,
+            };
+
+            authModel
+              .postUser(newBody)
+              .then(() => {
+                const newOtp = otp.generate(6);
+                const bodyOtp = {
+                  email: body.email,
+                  kode: newOtp,
+                };
+
+                authModel
+                  .insertOtp(bodyOtp)
+                  .then((_) => {
+                    sendEmail(body.email, res, newOtp);
+
+                    form.success(res, "success post", "new user", 200);
+                  })
+                  .catch((e) => {
+                    form.error(res, e, "Error", 404);
+                  });
+              })
+              .catch((e) => {
+                form.error(res, e, "Error", 200);
+              });
+          });
+        });
+        // }
+      })
+      .catch((e) => {
+        form.error(res, e, "Error", 200);
+      });
   },
   postPin: (req, res) => {},
 };
