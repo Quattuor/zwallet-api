@@ -18,6 +18,22 @@ module.exports = {
       });
   },
 
+  getUserPhone: (req, res) => {
+    const { phone } = req.params;
+    userModel
+      .getUserPhone(phone)
+      .then((data) => {
+        if (data.length) {
+          form.success(res, "Success", data, 200);
+        } else {
+          form.error(res, "Data not Found", "err", 404);
+        }
+      })
+      .catch((err) => {
+        form.error(res, "Error Occured", err, 400);
+      });
+  },
+
   updateUser: (req, res) => {
     const { id } = req.params;
     const { body } = req;
