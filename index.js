@@ -7,6 +7,7 @@ const bp = require("body-parser");
 const { PORT } = process.env;
 
 const routes = require("./src/routes/index");
+const {server, io, socketConnect} = require('./src/helper/socket');
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use(logger("dev"));
 
 app.use("/", routes);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`running on http://localhost:${PORT}`);
 });
+
+socketConnect(io)

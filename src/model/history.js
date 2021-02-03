@@ -3,6 +3,7 @@ const db = require('../config/database');
 const transferModel = (payload) =>  new Promise((resolve, reject) => {
   const Qstr = 'INSERT INTO HistoryUser SET ?'
   const id = Date.now()
+  let sender = ''
 
   const payloads = {
     id_history : `t-${id}`,
@@ -14,11 +15,12 @@ const transferModel = (payload) =>  new Promise((resolve, reject) => {
     if (err) {
       reject(err)
     }
-    const selectTransfer = `SELECT balance FROM users WHERE id_user = ${payload.id_user}`
+    const selectTransfer = `SELECT balance, username FROM users WHERE id_user = ${payload.id_user}`
     db.query(selectTransfer, (err,data) => {
       if (err) {
         reject(err)
       }
+      sender = data[0].username
       const updateTransfer = `UPDATE users SET ? WHERE id_user = ${payload.id_user}`
       db.query(updateTransfer, {balance: data[0].balance - payload.balance}, (err) => {
         if (err) {
@@ -52,7 +54,7 @@ const transferModel = (payload) =>  new Promise((resolve, reject) => {
       })
     })
   })
-  resolve(payload)
+  resolve({...payload, sender})
 
 })
 
@@ -90,12 +92,14 @@ const subscriptionModel = (payload) =>  new Promise((resolve, reject) => {
 
 const topupModel = (payload) =>  new Promise((resolve, reject) => {
   const id = Date.now() 
+  let receiver = '';
 
   const selectTransfer = `SELECT id_user, balance FROM users WHERE id_virtual LIKE '%${payload.id_virtual}%'`
   db.query(selectTransfer, (err,data) => {
     if (err) {
       reject(err)
     }
+    receiver = data[0].id_user;
 
     const Qstr = 'INSERT INTO HistoryOther SET ?'
     const payloads = {
@@ -121,7 +125,7 @@ const topupModel = (payload) =>  new Promise((resolve, reject) => {
 
   })  
 
-  resolve(payload)
+  resolve({...payload, receiver})
 
 })
 
