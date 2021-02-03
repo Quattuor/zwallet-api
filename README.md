@@ -71,7 +71,7 @@ Open [http://localhost:4000/](http://localhost:4000/) to view it in the browser.
 
 ### Documentation
 
-For more info visit [Endpoint User](https://documenter.getpostman.com/view/13522642/TW71k6kF)
+For more info visit [Endpoint User](https://documenter.getpostman.com/view/13522642/TW71k6kF),
                     [Endpoint Transfer and Contact](https://documenter.getpostman.com/view/9503318/TW71mSNK)
 ## License
 
