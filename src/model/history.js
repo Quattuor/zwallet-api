@@ -93,13 +93,18 @@ const subscriptionModel = (payload) =>  new Promise((resolve, reject) => {
 const topupModel = (payload) =>  new Promise((resolve, reject) => {
   const id = Date.now() 
   let receiver = '';
+  let sender =  '';
 
-  const selectTransfer = `SELECT id_user, balance FROM users WHERE id_virtual LIKE '%${payload.id_virtual}%'`
+  const selectTransfer = `SELECT u.id_user, u.balance, i.name 
+  FROM users AS u 
+  JOIN Instance AS i 
+  WHERE u.id_virtual LIKE '%${payload.id_virtual}%' AND i.id_instance LIKE '%${payload.id_instance}%'`
   db.query(selectTransfer, (err,data) => {
     if (err) {
       reject(err)
     }
     receiver = data[0].id_user;
+    sender = data[0].name
 
     const Qstr = 'INSERT INTO HistoryOther SET ?'
     const payloads = {
@@ -121,7 +126,7 @@ const topupModel = (payload) =>  new Promise((resolve, reject) => {
       if (err) {
         reject(err)
       }
-      resolve({...payload, receiver: receiver})
+      resolve({...payload, receiver: receiver, sender: sender})
     })
 
   })  

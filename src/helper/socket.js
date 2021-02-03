@@ -6,7 +6,7 @@ const io = require("socket.io")(server);
 const socketConnect  = (io) => {
   io.on("connection", (socket) => {
     const id = socket.handshake.query.id;
-    console.log("New User Has Connected ", id, socket.id);
+    console.log("Socket connect user ", id, socket.id);
     socket.join(id);
   });
 }

@@ -4,9 +4,9 @@ const form = require('../helper/form');
 
 const Transfer = (req, res) => {
   transferModel(req.body).then((data) => {
-    form.success(res,'here a payload', data, 201)
     try {
-      io.to(data.id_contact).emit("transaction", { title: `New Income from ${data.sender}`, message: `Received ${data.balance}` });
+      io.in(`${data.id_contact}`).emit("transaction", { title: 'New Income', message: `Received ${data.balance} from ${data.sender}` });
+      form.success(res,'here a payload', data, 201)
     } catch (err) {
       console.log(err);
     }
@@ -25,9 +25,9 @@ const Subscription = (req, res) => {
 
 const Topup  = (req, res) => {
   topupModel(req.body).then((data) => {
-    form.success(res,'here a payload', data, 201)
     try {
-      io.to(data.receiver).emit("topup", { title: `Top up Success`, message: `Received ${data.balance}` });
+      io.to(`${data.receiver}`).emit("topup", { title: 'Top up Success', message: `Received ${data.balance} from ${data.sender}` });
+      form.success(res,'here a payload', data, 201)
     } catch (err) {
       console.log(err);
     }
