@@ -134,4 +134,16 @@ module.exports = {
       });
     });
   },
+  updatePassword: (email, pass) => {
+    return new Promise((resolve, reject) => {
+      const q = `UPDATE users SET password='${pass}' WHERE email='${email}'`;
+      db.query(q, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  },
 };

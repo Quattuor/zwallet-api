@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const otp = require("../helper/otp");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { LOCAL } = process.env;
 
 const sendEmail = (email, res, otp) => {
   const transporter = nodemailer.createTransport({
@@ -19,9 +20,34 @@ const sendEmail = (email, res, otp) => {
     to: email,
     subject: "Code OTP",
     html:
-      "<p>Anda telah daftar <a href='http://localhost:4000/auth/account/v/" +
+      "<p>Anda telah daftar <a href='" +
+      LOCAL +
+      "/auth/account/v/" +
       otp +
       "'>Click</a> untuk verify akun</p>",
+  };
+
+  transporter.sendMail(mailOptions, function (error, _) {
+    if (error) {
+      return form.error(res, error, "Error Nodemailer", 404);
+    }
+  });
+};
+
+const sendEmailOtp = (email, res, otp) => {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: "elwanditirtana1945a@gmail.com",
+      pass: "ETDldTS123",
+    },
+  });
+
+  const mailOptions = {
+    from: "Zwallet",
+    to: email,
+    subject: "Code OTP",
+    html: "<p>Your code OTP is <b>" + otp + "</b></p>",
   };
 
   transporter.sendMail(mailOptions, function (error, _) {
@@ -61,6 +87,12 @@ module.exports = {
             const payload = {
               id: data[0].id_user,
               username: data[0].username,
+              lastname: data[0].lastname,
+              photo: data[0].photo,
+              balance: data[0].balance,
+              phone: data[0].phone,
+              id_virtual: data[0].id_virtual,
+              is_notification: data[0].is_notification,
               email: data[0].email,
               pin: data[0].pin,
             };
@@ -138,6 +170,33 @@ module.exports = {
         form.error(res, e, "Error", 200);
       });
   },
+  sendOtp: (req, res) => {
+    const { email } = req.body;
+
+    authModel
+      .getUserByEmail(email)
+      .then((data) => {
+        if (!data.length) {
+          form.error(res, "Email not found", "email", 200);
+        } else {
+          const kode = otp.generate(6);
+
+          authModel
+            .insertOtp({ email, kode })
+            .then(() => {
+              sendEmailOtp(email, res, kode);
+
+              form.success(res, "send otp", { kode }, 200);
+            })
+            .catch((e) => {
+              form.error(res, e, "Error", 200);
+            });
+        }
+      })
+      .catch((e) => {
+        form.error(res, e, "Error", 200);
+      });
+  },
   verifyOtp: (req, res) => {
     const { otp } = req.params;
 
@@ -146,7 +205,7 @@ module.exports = {
       .getOtp(otp)
       .then((data) => {
         if (!data.length) {
-          form.error(res, "Otp not found", "Otp", 401);
+          form.error(res, "Otp doens't match on our record", "Otp", 401);
         } else {
           authModel
             .updateVerified(data[0].email)
@@ -167,19 +226,16 @@ module.exports = {
   postOtp: (req, res) => {
     const { otp } = req.body;
 
-    console.log(otp);
     authModel
       .getOtp(otp)
       .then((data) => {
         if (!data.length) {
-          form.error(res, "Otp not found", "Otp", 401);
+          form.error(res, "Otp doens't match on our record", "Otp", 200);
         } else {
           authModel
-            .updateVerified(data[0].email)
+            .deleteOtp(otp)
             .then(() => {
-              authModel.deleteOtp(otp).then(() => {
-                form.success(res, "success update", "otp", 200);
-              });
+              form.success(res, "success otp", { email: data[0].email }, 200);
             })
             .catch((e) => {
               form.error(res, e, "Error", 200);
@@ -194,24 +250,37 @@ module.exports = {
     const { pin, id } = req.body;
 
     authModel
-      .getUserByPin(pin)
-      .then((user) => {
-        if (user.length) {
-          form.error(res, "Pin has been registered", "error pin", 200);
-        } else {
-          authModel
-            .updatePin(id, pin)
-            .then(() => {
-              form.success(res, "success update", "pin", 200);
-            })
-            .catch((e) => {
-              form.error(res, e, "Error", 404);
-            });
-        }
+      .updatePin(id, pin)
+      .then(() => {
+        form.success(res, "success update", "pin", 200);
       })
       .catch((e) => {
-        form.error(res, e, "Error", 200);
+        form.error(res, e, "Error", 404);
       });
+  },
+  resetPass: (req, res) => {
+    const { email, password } = req.body;
+
+    const saltRounds = 10;
+    bcrypt.genSalt(saltRounds, (err, salt) => {
+      if (err) {
+        form.error(res, err, "bycript", 401);
+      }
+      bcrypt.hash(password, salt, (err, hashedPassword) => {
+        if (err) {
+          form.error(res, err, "bycript", 401);
+        }
+
+        authModel
+          .updatePassword(email, hashedPassword)
+          .then(() => {
+            form.success(res, "success reset", "password", 200);
+          })
+          .catch((e) => {
+            form.error(res, e, "Error", 200);
+          });
+      });
+    });
   },
   logoutUser: (req, res) => {
     const bearerToken = req.header("x-access-token");
