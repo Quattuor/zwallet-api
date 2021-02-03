@@ -3,6 +3,7 @@ const db = require('../config/database');
 const transferModel = (payload) =>  new Promise((resolve, reject) => {
   const Qstr = 'INSERT INTO HistoryUser SET ?'
   const id = Date.now()
+  let sender = ''
 
   const payloads = {
     id_history : `t-${id}`,
@@ -14,11 +15,12 @@ const transferModel = (payload) =>  new Promise((resolve, reject) => {
     if (err) {
       reject(err)
     }
-    const selectTransfer = `SELECT balance FROM users WHERE id_user = ${payload.id_user}`
+    const selectTransfer = `SELECT balance, username FROM users WHERE id_user = ${payload.id_user}`
     db.query(selectTransfer, (err,data) => {
       if (err) {
         reject(err)
       }
+      sender = data[0].username
       const updateTransfer = `UPDATE users SET ? WHERE id_user = ${payload.id_user}`
       db.query(updateTransfer, {balance: data[0].balance - payload.balance}, (err) => {
         if (err) {
@@ -49,10 +51,10 @@ const transferModel = (payload) =>  new Promise((resolve, reject) => {
         if (err) {
           reject(err)
         }
+        resolve({...payload, sender})
       })
     })
   })
-  resolve(payload)
 
 })
 
@@ -90,12 +92,19 @@ const subscriptionModel = (payload) =>  new Promise((resolve, reject) => {
 
 const topupModel = (payload) =>  new Promise((resolve, reject) => {
   const id = Date.now() 
+  let receiver = '';
+  let sender =  '';
 
-  const selectTransfer = `SELECT id_user, balance FROM users WHERE id_virtual LIKE '%${payload.id_virtual}%'`
+  const selectTransfer = `SELECT u.id_user, u.balance, i.name 
+  FROM users AS u 
+  JOIN Instance AS i 
+  WHERE u.id_virtual LIKE '%${payload.id_virtual}%' AND i.id_instance LIKE '%${payload.id_instance}%'`
   db.query(selectTransfer, (err,data) => {
     if (err) {
       reject(err)
     }
+    receiver = data[0].id_user;
+    sender = data[0].name
 
     const Qstr = 'INSERT INTO HistoryOther SET ?'
     const payloads = {
@@ -117,11 +126,10 @@ const topupModel = (payload) =>  new Promise((resolve, reject) => {
       if (err) {
         reject(err)
       }
+      resolve({...payload, receiver: receiver, sender: sender})
     })
 
   })  
-
-  resolve(payload)
 
 })
 

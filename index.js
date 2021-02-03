@@ -1,5 +1,5 @@
 require("dotenv").config();
-const express = require("express");
+const {io, server, app, express, socketConnect} = require('./src/helper/socket');
 const logger = require("morgan");
 const cors = require("cors");
 const bp = require("body-parser");
@@ -7,8 +7,6 @@ const bp = require("body-parser");
 const { PORT } = process.env;
 
 const routes = require("./src/routes/index");
-
-const app = express();
 
 app.use(express.static("public"));
 app.use(cors());
@@ -18,6 +16,8 @@ app.use(logger("dev"));
 
 app.use("/", routes);
 
-app.listen(PORT, () => {
-  console.log(`running on http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`running on port ${PORT}`);
 });
+
+socketConnect(io)
