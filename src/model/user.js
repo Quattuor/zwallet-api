@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const bcrypt = require('bcrypt')
 
 module.exports = {
   getUserById: (req) => {
