@@ -1,5 +1,5 @@
 const db = require("../config/database");
-const bcrypt = require('bcrypt')
+const bcrypt = require("bcrypt");
 
 module.exports = {
   getUserById: (req) => {
@@ -16,7 +16,7 @@ module.exports = {
     });
   },
 
-  getUserPhone : (req) => {
+  getUserPhone: (req) => {
     return new Promise((resolve, reject) => {
       const qs =
         "SELECT id_user, username, email, phone, photo FROM users WHERE phone = ?";
@@ -87,6 +87,36 @@ module.exports = {
           }
         } else {
           reject(err);
+        }
+      });
+    });
+  },
+
+  SetPIN: (email, PIN) => {
+    return new Promise((resolve, reject) => {
+      const queryStr = `UPDATE users SET pin = ? WHERE email = ?`;
+      db.query(queryStr, [PIN, email], (err, data) => {
+        if (!err) {
+          resolve("SET PIN berhasil");
+        } else {
+          reject("Error");
+        }
+      });
+    });
+  },
+
+  CheckPIN: (email, PIN) => {
+    return new Promise((resolve, reject) => {
+      const queryStr = `SELECT * FROM users WHERE email = ? AND pin = ?`;
+      db.query(queryStr, [email, PIN], (err, data) => {
+        if (!err) {
+          if (data.length > 0) {
+            resolve("PIN benar");
+          } else {
+            reject("PIN salah");
+          }
+        } else {
+          reject("Error");
         }
       });
     });
