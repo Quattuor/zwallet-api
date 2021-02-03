@@ -69,4 +69,30 @@ module.exports = {
         form.error(res, "Encountered Error", err, 400);
       });
   },
+
+  SetPIN: (req, res) => {
+    const { email } = req.decodedToken;
+    const { PIN } = req.body;
+    userModel
+      .SetPIN(email, PIN)
+      .then((data) => {
+        form.success(res, "Success Set PIN", data, 200)
+      })
+      .catch((err) => {
+        form.error(res, "Encountered Error", err, 400);
+      });
+  },
+
+  CheckPIN: (req, res) => {
+    const { email } = req.decodedToken;
+    const { PIN } = req.params;
+    userModel
+      .CheckPIN(email, PIN)
+      .then((data) => {
+        form.success(res, "Success Check PIN", data, 200)
+      })
+      .catch((err) => {
+        form.error(res, "Encountered Error", err, 400);
+      });
+  },
 };

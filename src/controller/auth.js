@@ -88,12 +88,12 @@ module.exports = {
               id: data[0].id_user,
               username: data[0].username,
               lastname: data[0].lastname,
-              photo: data[0].photo,
-              balance: data[0].balance,
+              email: data[0].email,
               phone: data[0].phone,
               id_virtual: data[0].id_virtual,
-              is_notification: data[0].is_notification,
-              email: data[0].email,
+              photo: data[0].photo,
+              balance: data[0].balance,
+              notification: data[0].is_notification,
               pin: data[0].pin,
             };
             const secret = process.env.SECRET_KEY;

@@ -34,7 +34,7 @@ module.exports = {
     } else {
       const token = bearerToken.split(" ")[1];
       return new Promise((resolve, reject) => {
-        const qs = "SELECT token FROM token_whitelist WHERE token = ?";
+        const qs = "SELECT token FROM blacklist WHERE token = ?";
         db.query(qs, token, (err, data) => {
           if (!err) {
             if (!data[0]) {
@@ -59,6 +59,80 @@ module.exports = {
         .catch((err) => {
           form.error(res, "Error occurred", err, 401);
         });
+    }
+  },
+
+  isPIN: (req, res, next) => {
+    const email = req.decodedToken.email;
+    const PIN = req.header("x-access-PIN");
+    if (!PIN) {
+      form.error(res, "Invalid PIN", err, 401);
+    } else {
+      return new Promise((resolve, reject) => {
+        const queryStr = `SELECT * FROM users WHERE email = ? AND pin = ?`;
+        db.query(queryStr, [email, PIN], (err, data) => {
+          if (!err) {
+            if (data.length > 0) {
+              resolve({
+                status: 200,
+              });
+            } else {
+              reject({
+                status: 404,
+                message: `PIN salah`,
+              });
+            }
+          } else {
+            reject({
+              status: 500,
+              message: err,
+            });
+          }
+        });
+      })
+        .then((result) => {
+          next();
+        })
+        .catch((error) => {
+          res.status(error.status).json(error);
+        });
+    }
+  },
+
+  phoneUsed: (req, res, next) => {
+    const { phone } = req.body;
+    if (phone != undefined) {
+      return new Promise((resolve, reject) => {
+        const queryStr = `SELECT phone FROM users WHERE phone = ?`;
+        db.query(queryStr, phone, (err, data) => {
+          if (!err) {
+            if (data.length > 0) {
+              reject({
+                status: 401,
+                message: `No. HP sudah digunakan`,
+              });
+            } else {
+              resolve({
+                status: 200,
+              });
+            }
+          } else {
+            reject({
+              status: 500,
+              message: `INTERNAL SERVER ERROR`,
+              details: err,
+            });
+          }
+        });
+      })
+        .then((result) => {
+          next();
+        })
+        .catch((error) => {
+          res.status(error.status).json(error);
+        });
+    } else {
+      next();
     }
   },
 };

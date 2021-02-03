@@ -2,7 +2,7 @@ const db = require('../config/database');
 
 const getAll = (payload) => new Promise((resolve, reject) => {
   const qs =
-    `SELECT u.id_user, u.username, u.phone, u.photo 
+    `SELECT u.id_user, u.username, u.lastname, u.phone, u.photo 
     FROM contact AS c
     JOIN users AS u
     ON u.id_user = c.id_contact
