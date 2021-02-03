@@ -51,10 +51,10 @@ const transferModel = (payload) =>  new Promise((resolve, reject) => {
         if (err) {
           reject(err)
         }
+        resolve({...payload, sender})
       })
     })
   })
-  resolve({...payload, sender})
 
 })
 
@@ -121,11 +121,10 @@ const topupModel = (payload) =>  new Promise((resolve, reject) => {
       if (err) {
         reject(err)
       }
+      resolve({...payload, receiver: receiver})
     })
 
   })  
-
-  resolve({...payload, receiver})
 
 })
 

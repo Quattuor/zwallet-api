@@ -7,9 +7,10 @@ const bp = require("body-parser");
 const { PORT } = process.env;
 
 const routes = require("./src/routes/index");
-const {server, io, socketConnect} = require('./src/helper/socket');
+const {io, socketConnect} = require('./src/helper/socket');
 
 const app = express();
+const server = require("http").createServer(app);
 
 app.use(express.static("public"));
 app.use(cors());
@@ -20,7 +21,7 @@ app.use(logger("dev"));
 app.use("/", routes);
 
 server.listen(PORT, () => {
-  console.log(`running on http://localhost:${PORT}`);
+  console.log(`running on port ${PORT}`);
 });
 
 socketConnect(io)
