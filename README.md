@@ -75,4 +75,4 @@ For more info visit [Endpoint User](https://documenter.getpostman.com/view/13522
                     [Endpoint Transfer and Contact](https://documenter.getpostman.com/view/9503318/TW71mSNK)
 ## License
 
-Distributed under the [MIT](https://github.com/Quattuor/zwallet-api/blob/main/LICENSE) License.
+Distributed under the [MIT](https://github.com/Quattuor/zwallet-api/blob/main/LICENSE.md) License.
