@@ -66,10 +66,7 @@ module.exports = {
     const email = req.decodedToken.email;
     const PIN = req.header("x-access-PIN");
     if (!PIN) {
-      res.status(401).json({
-        status: 401,
-        message: `invalid PIN`,
-      });
+      form.error(res, "Invalid PIN", err, 401);
     } else {
       return new Promise((resolve, reject) => {
         const queryStr = `SELECT * FROM users WHERE email = ? AND pin = ?`;
@@ -82,7 +79,7 @@ module.exports = {
             } else {
               reject({
                 status: 404,
-                message: `PIN tidak teridentifikasi`,
+                message: `PIN salah`,
               });
             }
           } else {
