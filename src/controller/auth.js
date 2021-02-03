@@ -61,6 +61,7 @@ module.exports = {
             const payload = {
               id: data[0].id_user,
               username: data[0].username,
+              lastname: data[0].lastname,
               email: data[0].email,
               phone: data[0].phone,
               id_virtual: data[0].id_virtual,
