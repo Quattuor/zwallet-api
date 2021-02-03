@@ -5,7 +5,7 @@ module.exports = {
   getUserById: (req) => {
     return new Promise((resolve, reject) => {
       const qs =
-        "SELECT id_user, username, email, pin, phone, photo, balance, id_virtual FROM users WHERE id_user = ?";
+        "SELECT id_user, username, lastname, email, pin, phone, photo, balance, id_virtual FROM users WHERE id_user = ?";
       db.query(qs, req, (err, data) => {
         if (!err) {
           resolve(data);
