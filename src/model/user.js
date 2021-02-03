@@ -30,12 +30,12 @@ module.exports = {
 
   updatePass: (body, email) => {
     return new Promise((resolve, reject) => {
-      const { old_password, new_password } = body;
+      const { oldpass, newpass } = body;
       const queryStr = `SELECT password FROM users WHERE email = ?`;
       db.query(queryStr, email, (err, data) => {
         if (!err) {
           if (data.length > 0) {
-            bcrypt.compare(old_password, data[0].password, (error, result) => {
+            bcrypt.compare(oldpass, data[0].password, (error, result) => {
               if (error) {
                 reject(error);
               }
@@ -44,7 +44,7 @@ module.exports = {
               } else {
                 const saltRounds = Math.floor(Math.random() * 10) + 1;
                 bcrypt.hash(
-                  new_password,
+                  newpass,
                   saltRounds,
                   (errorHash, hashedPassword) => {
                     if (errorHash) {

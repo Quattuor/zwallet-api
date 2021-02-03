@@ -45,8 +45,7 @@ const uploadImg = {
         form.error(res, "Multer Error", err, 400);
       } else {
         try {
-          req.body.photo =
-            process.env.LOCAL + "/images/" + req.file.filename;
+          req.body.photo = "/images/" + req.file.filename;
         } catch {
           err;
         } finally {
@@ -66,7 +65,7 @@ const uploadImg = {
       } else {
         try {
           const image = req.files.map((file) => {
-            return process.env.LOCAL + file.filename;
+            return file.filename;
           });
           req.body.image = image.join(",");
         } catch {
