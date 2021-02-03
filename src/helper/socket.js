@@ -11,4 +11,4 @@ const socketConnect  = (io) => {
   });
 }
 
-module.exports = {io, server, socketConnect}
+module.exports = {io, server, app, express, socketConnect}

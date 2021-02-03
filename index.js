@@ -1,5 +1,5 @@
 require("dotenv").config();
-const express = require("express");
+const {io, server, app, express, socketConnect} = require('./src/helper/socket');
 const logger = require("morgan");
 const cors = require("cors");
 const bp = require("body-parser");
@@ -7,10 +7,6 @@ const bp = require("body-parser");
 const { PORT } = process.env;
 
 const routes = require("./src/routes/index");
-const {io, socketConnect} = require('./src/helper/socket');
-
-const app = express();
-const server = require("http").createServer(app);
 
 app.use(express.static("public"));
 app.use(cors());
