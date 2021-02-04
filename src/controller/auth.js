@@ -10,8 +10,8 @@ const sendEmail = (email, res, otp) => {
   const transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {
-      user: "elwanditirtana1945a@gmail.com",
-      pass: "ETDldTS123",
+      user: "blanjaarkademy@gmail.com",
+      pass: "Blanja2020",
     },
   });
 
@@ -38,8 +38,8 @@ const sendEmailOtp = (email, res, otp) => {
   const transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {
-      user: "elwanditirtana1945a@gmail.com",
-      pass: "ETDldTS123",
+      user: "blanjaarkademy@gmail.com",
+      pass: "Blanja2020",
     },
   });
 
